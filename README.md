@@ -166,3 +166,51 @@ plot(puntos_sf, add = T)
 >comparar <- puntos_sf %>%
   as_tibble() %>% 
   dplyr::select(pp, Altitud, Presión, Albedo)
+  
+## Extraer data de Google Earth Engine
+
+>terraclimate <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE")$
+  filterDate("2010-01-01","2017-12-31")$
+  map(function(x) x$reproject("EPSG:4326")$select("pr"))
+
+
+### Extraer datos de pp 
+>ppt <- ee_extract(terraclimate, canta,
+                  fun = ee$Reducer$mean())
+
+### Otro formato 
+>ppt_2 <- pivot_longer(ppt, everything(), 
+                      names_to = "month",
+                      values_to = "pr")
+
+### Crear una columna de fechas
+>Fecha <- seq(as.Date("2010-01-01"),
+              by = "month",
+              length.out = 96)
+ppt_2$Fecha <- Fecha
+
+## Gráfica 
+>ggplot(ppt_2, aes(fechas, pr))+
+  geom_line(col = "blue")+
+  ggtitle("Precipitación de Canta")+
+  xlab("Fecha")+
+  ylab("Precipitación (mm)")
+  ![pp_mensual_canta](https://user-images.githubusercontent.com/70491176/93722854-600ab200-fb5f-11ea-9516-ef017e59fc8b.png)
+
+## De mensual a anual
+>library(lubridate)  #Esta librería es necesaria para luego hacer el mutate
+
+>ppt_anual <- ppt_2 %>% 
+  mutate(year = year(Fecha), month = month(Fecha)) %>% 
+  group_by(year) %>% 
+  summarize(pr = sum(pr))
+
+## Gráfica de la precipitación anual de Canta
+
+>ggplot(ppt_anual, aes(year, pr))+
+  geom_line(col = "blue")+
+  ggtitle("Precipitación Anual en Canta (mm)")+
+  xlab("Fecha")+
+  ylab("Precipitación (mm)")+
+  theme_dark()
+![pp_anual_canta](https://user-images.githubusercontent.com/70491176/93722856-60a34880-fb5f-11ea-891c-8085b769ab0e.png)
