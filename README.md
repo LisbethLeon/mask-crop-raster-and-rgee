@@ -120,20 +120,9 @@ plot(puntos_sf, add = T)
 >comparar <- puntos_sf %>%
   as_tibble() %>% 
   dplyr::select(pp, Altitud, Presión)
-  > comparar
-  A tibble: 23 x 3
-      pp Altitud Presión
-   <dbl>   <dbl>   <dbl>
- 1 0.113    1169  86612.
- 2 0.113     910  86612.
- 3 0.113     835  86612.
- 4 0.113    1959  86612.
- 5 0.113    1784  86612.
- 6 0.113    3039  86612.
- 7 0.113    1414  86612.
- 8 0.311    1749  71426.
- 9 0.311    3349  71426.
-10 0.311    2979  71426.
+>comparar 
+![tibble_comparar](https://user-images.githubusercontent.com/70491176/93719999-efa66580-fb4b-11ea-89cd-3b9325093082.PNG)
+
 
 #####Algunos ploteos
 >plot(comparar$Altitud, comparar$Presión,
