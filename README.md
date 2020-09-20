@@ -1,5 +1,5 @@
 # Usando librerías raster y rgee para relacionar elementos climáticos
-R
+Elaborado por Fernando Herrera, 20 de septiembre del 2020.
 
 ## Introducción
 
