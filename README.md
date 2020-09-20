@@ -56,7 +56,7 @@ Como se puede apreciar en el ploteo, aún no tenemos el area que necesitamos. Pa
 >canta_dem <- mask(canta_crop, sp_canta)
 plot(canta_dem)
 ![dem_solo_canta](https://user-images.githubusercontent.com/70491176/93719117-342f0280-fb46-11ea-8da9-552502ebc3dc.png)
-¡Con este raster optenido ya podríamos empezar a trabajar!
+¡Con este raster obtenido ya podríamos empezar a trabajar!
 
 #####Hallar la altitud media para canta (w/e)
 >altitud_media <- raster::extract(canta_dem, 
