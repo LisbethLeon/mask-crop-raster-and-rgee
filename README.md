@@ -121,7 +121,7 @@ plot(puntos_sf, add = T)
   as_tibble() %>% 
   dplyr::select(pp, Altitud, Presión)
   > comparar
-# A tibble: 23 x 3
+  A tibble: 23 x 3
       pp Altitud Presión
    <dbl>   <dbl>   <dbl>
  1 0.113    1169  86612.
