@@ -67,9 +67,12 @@ plot(canta_dem)
 #####10. Ahora con el uso de mapview y editMap seleccionaremos una area relativa a Canta para analizar algunos elementos climáticos.
 >area <- mapview(canta_dem) %>% 
   editMap()
-area_sf <- area$all
-plot(area_sf)
-mapview(list(canta_dem, area_sf))
+
+>area_sf <- area$all
+
+>plot(area_sf)
+
+>mapview(list(canta_dem, area_sf))
 
 #####11. Conviertiendo un objeto sf a ee con la librería rgee para luego extrar datos.
 >area_ee <- sf_as_ee(area_sf)
@@ -78,11 +81,15 @@ mapview(list(canta_dem, area_sf))
 >ee_pp <- ee$ImageCollection("ECMWF/ERA5/MONTHLY")$
   filterDate("2018-01-01", "2019-01-01")$
   first()
-pp_stack <- ee_as_raster(imag  = ee_pp,
+
+>pp_stack <- ee_as_raster(imag  = ee_pp,
                          region = area_ee$geometry())
-pp_area <- pp_stack[[5]]
-plot(pp_area)
-mapview(list(pp_area, canta_dem))
+
+>pp_area <- pp_stack[[5]]
+
+>plot(pp_area)
+
+>mapview(list(pp_area, canta_dem))
 
 #####13. Surface Pressure (Pa)
 >presion_area <- pp_stack[[6]]
@@ -98,8 +105,10 @@ plot(puntos_sf, add = T)
 
 #####15. Agregando las columnas de los datos que acabamos de extraer
 >puntos_sf$pp <- raster::extract(pp_area, puntos_sf)
-puntos_sf$Altitud <- raster::extract(canta_dem, puntos_sf)
-puntos_sf$Presión <- raster::extract(presion_area, puntos_sf)
+
+>puntos_sf$Altitud <- raster::extract(canta_dem, puntos_sf)
+
+>puntos_sf$Presión <- raster::extract(presion_area, puntos_sf)
 
 #####16. Relacionando elementos climáticos
 >comparar <- puntos_sf %>%
@@ -117,21 +126,28 @@ puntos_sf$Presión <- raster::extract(presion_area, puntos_sf)
 >pp_hour <- ee$ImageCollection("JAXA/GPM_L3/GSMaP/v6/operational")$
   filterDate("2018-08-06", "2018-08-07")$
   first()
-pp2_stack <- ee_as_raster(imag  = ee_pp,
+
+>pp2_stack <- ee_as_raster(imag  = ee_pp,
                          region = area_ee$geometry())
-pp_area_hour <- pp2_stack[[1]]
-plot(pp_area_hour)
-mapview(list(pp_area_hour, canta_dem))
+
+>pp_area_hour <- pp2_stack[[1]]
+
+>plot(pp_area_hour)
+
+>mapview(list(pp_area_hour, canta_dem))
 
 ##### Albedo instantáneo
 >albedo <- ee$ImageCollection("NASA/GLDAS/V021/NOAH/G025/T3H")$
   filterDate("2018-08-06", "2018-08-07")$
   first()
-albedo_stack <- ee_as_raster(imag  = albedo,
+
+>albedo_stack <- ee_as_raster(imag  = albedo,
                           region = area_ee$geometry())
-albedo_area <- albedo_stack[[1]]
-plot(albedo_area)
-mapview(list(albedo_area, canta_dem))
+>albedo_area <- albedo_stack[[1]]
+
+>plot(albedo_area)
+
+>mapview(list(albedo_area, canta_dem))
 
 >puntos_sf$Albedo <- raster::extract(albedo_area, puntos_sf)
 
