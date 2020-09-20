@@ -29,6 +29,7 @@ dem2 <- raster("ASTGTM_S12W078_dem.tif")
 
 #####3. Unir 2 raster con merge
 >dem <- merge(dem1, dem2)
+
 #####4. Filtrar solo la provincia deseada
 >canta <- prov %>% 
   filter(PROCOD98 == 1504)
