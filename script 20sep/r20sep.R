@@ -3,18 +3,21 @@ library(tidyverse)
 library(sf)
 library(sp)
 library(raster)
+library(ggplot2)
 library(rgee)
 library(mapview)
 library(mapedit)
+library(lubridate)
 ee_Initialize("fer")
 #cargar shape provincias
-prov <- st_read("Provincias.shp")
+prov <- st_read("Shapefiles/Provincias.shp")
 mapview(canta_dist)
 ##dem
-dem1 <- raster("ASTGTM_S12W077_dem.tif")
-dem2 <- raster("ASTGTM_S12W078_dem.tif")
+dem1 <- raster("Dem para canta/ASTGTM_S12W077_dem.tif")
+dem2 <- raster("Dem para canta/ASTGTM_S12W078_dem.tif")
 #Unir 2 raster con merge
 dem <- merge(dem1, dem2)
+mapview(list(dem, canta) )
 #filtrar canta
 canta <- prov %>% 
   filter(PROCOD98 == 1504)
@@ -22,7 +25,8 @@ canta <- prov %>%
 #mask raster -> as(simple feature, "Spatial)
 sp_canta <- as(canta, "Spatial")
 canta_mask<- mask(dem, sp_canta)        
-plot(canta_mask)                
+plot(canta_mask, 
+     main = "Dem para canta")                
 ##crop (corte)
 canta_crop <- crop(dem, sp_canta)
 plot(canta_crop)
@@ -30,8 +34,8 @@ canta_dem <- mask(canta_crop, sp_canta)
 plot(canta_dem)
 ##altitud media canta
 altitud_media <- raster::extract(canta_dem, 
-                                 sp_canta, f
-                                 un = mean)
+                                 sp_canta, 
+                                 fun = mean)
 ##area relativa a canta
 area <- mapview(canta_dem) %>% 
   editMap()
@@ -73,7 +77,7 @@ puntos_sf$Presión <- raster::extract(presion_area, puntos_sf)
 comparar <- puntos_sf %>%
   as_tibble() %>% 
   dplyr::select(pp, Altitud, Presión)
-cor(comparar)
+plot(comparar)
 #plot altitud vs surface pressure
 plot(comparar$Altitud, comparar$Presión,
      main = "Altitude vs Surface Pressure",
@@ -104,3 +108,48 @@ puntos_sf$Albedo <- raster::extract(albedo_area, puntos_sf)
 comparar <- puntos_sf %>%
   as_tibble() %>% 
   dplyr::select(pp, Altitud, Presión, Albedo)
+
+
+##Extraer data de Google earth engine
+
+terraclimate <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE")$
+  filterDate("2010-01-01","2017-12-31")$
+  map(function(x) x$reproject("EPSG:4326")$select("pr"))
+
+
+#extraer datos de pp 
+ppt <- ee_extract(terraclimate, canta,
+                  fun = ee$Reducer$mean())
+
+## otro formato 
+ppt_2 <- pivot_longer(ppt, everything(), 
+                      names_to = "month",
+                      values_to = "pr")
+
+##crear una columna de fechas
+Fecha <- seq(as.Date("2010-01-01"),
+              by = "month",
+              length.out = 96)
+ppt_2$Fecha <- Fecha
+
+##plot
+ggplot(ppt_2, aes(fechas, pr))+
+  geom_line(col = "blue")+
+  ggtitle("Precipitación de Canta")+
+  xlab("Fecha")+
+  ylab("Precipitación (mm)")
+
+##De mensual a anual
+library(lubridate)
+ppt_anual <- ppt_2 %>% 
+  mutate(year = year(Fecha), month = month(Fecha)) %>% 
+  group_by(year) %>% 
+  summarize(pr = sum(pr))
+
+##plot anual
+ggplot(ppt_anual, aes(year, pr))+
+  geom_line(col = "blue")+
+  ggtitle("Precipitación Anual en Canta (mm)")+
+  xlab("Fecha")+
+  ylab("Precipitación (mm)")+
+  theme_dark()
